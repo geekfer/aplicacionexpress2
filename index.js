@@ -1,13 +1,30 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
-const cors = require('cors'); // <--- 1. AGREGAR ESTO
+const cors = require('cors');
 
 const app = express();
-const db = new sqlite3.Database('./base.sqlite3');
-
-app.use(cors()); // <--- 2. AGREGAR ESTO para permitir conexiones externas
+app.use(cors());
 app.use(bodyParser.json());
+
+// 1. Conexión y creación automática del archivo
+const db = new sqlite3.Database('./base.sqlite3', (err) => {
+    if (err) {
+        console.error("Error al abrir base de datos:", err.message);
+    } else {
+        console.log("Conectado a SQLite correctamente.");
+        
+        // 2. CREACIÓN AUTOMÁTICA DE LA TABLA
+        // Esto asegura que aunque el archivo esté vacío, la tabla 'todos' exista
+        db.run(`CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            todo TEXT NOT NULL
+        )`, (err) => {
+            if (err) console.error("Error creando tabla:", err.message);
+            else console.log("Tabla 'todos' lista para usar.");
+        });
+    }
+});
 
 app.post('/agrega_todo', (req, res) => {
     const { todo } = req.body;
@@ -49,16 +66,3 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
-const db = new sqlite3.Database('./base.sqlite3', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-    if (err) {
-        console.error("❌ Error al abrir la base de datos:", err.message);
-    } else {
-        console.log("✅ Conectado a la base de datos base.sqlite3");
-        
-        // Opcional: Crear la tabla si por alguna razón no existe en Render
-        db.run(`CREATE TABLE IF NOT EXISTS todos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            todo TEXT
-        )`);
-    }
-});
