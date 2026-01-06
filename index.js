@@ -49,7 +49,16 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
-const db = new sqlite3.Database('./base.sqlite3', (err) => {
-    if (err) console.error("Error abriendo base:", err.message);
-    else console.log("Conectado a SQLite correctamente");
+const db = new sqlite3.Database('./base.sqlite3', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+    if (err) {
+        console.error("❌ Error al abrir la base de datos:", err.message);
+    } else {
+        console.log("✅ Conectado a la base de datos base.sqlite3");
+        
+        // Opcional: Crear la tabla si por alguna razón no existe en Render
+        db.run(`CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            todo TEXT
+        )`);
+    }
 });
