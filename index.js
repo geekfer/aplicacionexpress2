@@ -48,3 +48,8 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+
+const db = new sqlite3.Database('./base.sqlite3', (err) => {
+    if (err) console.error("Error abriendo base:", err.message);
+    else console.log("Conectado a SQLite correctamente");
+});
